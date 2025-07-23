@@ -1,16 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Upload - LH TWEAKS</title>
-  <link rel="stylesheet" href="assets/styles.css">
+  <title>Admin Upload Panel - LH TWEAKS</title>
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAe5meLVox_rJTKMV5RIbRV3jQo972_CR0",
+      authDomain: "lh-tweaks.firebaseapp.com",
+      projectId: "lh-tweaks",
+      storageBucket: "lh-tweaks.appspot.com",
+      messagingSenderId: "703975942267",
+      appId: "1:703975942267:web:c6aac37e06617c105e9ade"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+
+    const signIn = () => {
+      signInWithPopup(auth, provider)
+        .catch(error => {
+          console.error("Login Error:", error.message);
+          alert("Login failed.");
+        });
+    };
+
+    onAuthStateChanged(auth, user => {
+      const container = document.getElementById("admin-content");
+      const login = document.getElementById("login-btn");
+
+      if (user) {
+        if (user.email === "thejyothizkrishna@gmail.com") {
+          container.style.display = "block";
+          login.style.display = "none";
+        } else {
+          container.innerHTML = "<h2>Access Denied</h2>";
+          login.style.display = "none";
+        }
+      } else {
+        container.style.display = "none";
+        login.style.display = "block";
+      }
+    });
+  </script>
+  <style>
+    body { background-color: #121212; color: white; font-family: sans-serif; text-align: center; padding: 40px; }
+    button { padding: 10px 20px; background: #00ff99; border: none; font-size: 18px; cursor: pointer; border-radius: 8px; }
+  </style>
 </head>
 <body>
-  <section class="upload-panel">
-    <h2>Admin Upload Panel</h2>
-    <p>This will be connected to Firebase for private uploads.</p>
-  </section>
-  <script src="assets/scripts.js"></script>
+  <h1>LH TWEAKS Admin Panel</h1>
+  <button id="login-btn" onclick="signIn()">Sign in with Google</button>
+
+  <div id="admin-content" style="display:none;">
+    <h2>Welcome Admin!</h2>
+    <p>You can upload mods here (we’ll connect this to Firebase storage next).</p>
+    <!-- Upload form coming soon -->
+  </div>
 </body>
 </html>
