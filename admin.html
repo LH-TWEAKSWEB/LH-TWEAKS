@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex">
+  <title>Admin Panel - LH Tweaks</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #1db954;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #17a44d;
+    }
+    .form-container {
+      max-width: 500px;
+      margin: auto;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel – LH Tweaks</h1>
+  <p>Only visible to authorized admin (you).</p>
+
+  <div id="login">
+    <button onclick="signIn()">Sign in with Google</button>
+  </div>
+
+  <div id="adminForm" class="hidden">
+    <div class="form-container">
+      <h2>Upload New Mod</h2>
+      <input type="text" id="modTitle" placeholder="Mod Title" />
+      <textarea id="modDescription" placeholder="Mod Description"></textarea>
+      <input type="text" id="modLink" placeholder="DevUploads Download Link" />
+      <input type="text" id="modImage" placeholder="Thumbnail Image URL" />
+      <button onclick="uploadMod()">Upload Mod</button>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    // Import Firebase scripts
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAe5meLVox_rJTKMV5RIbRV3jQo972_CR0",
+      authDomain: "lh-tweaks.firebaseapp.com",
+      projectId: "lh-tweaks",
+      storageBucket: "lh-tweaks.appspot.com",
+      messagingSenderId: "703975942267",
+      appId: "1:703975942267:web:c6aac37e06617c105e9ade"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const allowedEmail = "thejyothizkrishna@gmail.com";
+
+    function signIn() {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          if (user.email === allowedEmail) {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('adminForm').classList.remove('hidden');
+          } else {
+            alert("Access denied. You are not the admin.");
+          }
+        })
+        .catch((error) => {
+          alert("Error signing in: " + error.message);
+        });
+    }
+
+    function uploadMod() {
+      const title = document.getElementById("modTitle").value;
+      const description = document.getElementById("modDescription").value;
+      const link = document.getElementById("modLink").value;
+      const image = document.getElementById("modImage").value;
+
+      if (!title  !description  !link || !image) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      addDoc(collection(db, "mods"), {
+        title,
+        description,
+        link,
+        image
+      })
+        .then(() => {
+          alert("Mod uploaded successfully!");
+          document.getElementById("modTitle").value = "";
+          document.getElementById("modDescription").value = "";
+          document.getElementById("modLink").value = "";
+          document.getElementById("modImage").value = "";
+        })
+        .catch((error) => {
+          alert("Error uploading mod: " + error.message);
+        });
+    }
+    // Check if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email === allowedEmail) {
+        document.getElementById('login').classList.add('hidden');
+        document.getElementById('adminForm').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
